@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Chatbox</title>
+    <link rel="stylesheet" href="chat.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box">
+            <!-- Messages will be appended here -->
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chat-input" placeholder="Type a message..." autofocus>
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // script.js
+document.getElementById('send-btn').addEventListener('click', sendMessage);
+
+function sendMessage() {
+    const inputBox = document.getElementById('chat-input');
+    const message = inputBox.value.trim();
+    
+    if (message !== '') {
+        // Create a new message element for the user's message
+        const userMessage = document.createElement('div');
+        userMessage.className = 'message user';
+        userMessage.textContent = message;
+        
+        // Append the user's message to the chat box
+        document.getElementById('chat-box').appendChild(userMessage);
+        
+        // Clear the input box
+        inputBox.value = '';
+        
+        // Scroll to the bottom of the chat box
+        const chatBox = document.getElementById('chat-box');
+        chatBox.scrollTop = chatBox.scrollHeight;
+        
+        // Call the API to get the bot's response
+        fetchBotResponse(message);
+    }
+}
+
+function fetchBotResponse(userMessage) {
+    const apiKey = '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'; // Replace with your OpenAI API key
+    const endpoint = 'https://api.openai.com/v1/engines/davinci-codex/completions';
+
+    const data = {
+        prompt: userMessage,
+        max_tokens: 150,
+        temperature: 0.7
+    };
+
+    fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        const botMessage = document.createElement('div');
+        botMessage.className = 'message bot';
+        botMessage.textContent = data.choices[0].text.trim();
+        document.getElementById('chat-box').appendChild(botMessage);
+        document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const botMessage = document.createElement('div');
+        botMessage.className = 'message bot';
+        botMessage.textContent = "Sorry, there was an error processing your request.";
+        document.getElementById('chat-box').appendChild(botMessage);
+    });
+}
+</script>
+
+</body>
+</html>
